@@ -22,19 +22,29 @@ namespace Bulky.DataAccess.Repository
             dbSet.Add(entity);
         }
 
-        public T Get(Expression<Func<T, bool>> filter, String? includeProperties = null)
+        public T Get(Expression<Func<T, bool>> filter, String? includeProperties = null, bool tracked = false)
         {
-            IQueryable<T> query = dbSet;
+            IQueryable<T> query;
+            if (tracked)
+            {
+                query = dbSet;
+                
+            }
+            else
+            {
+                 query = dbSet.AsNoTracking();
+            }
             if (includeProperties != null)
             {
                 foreach (var property in includeProperties
                     .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
-                   query= query.Include(property);
+                    query = query.Include(property);
                 }
             }
             query = query.Where(filter);
             return query.FirstOrDefault();
+
         }
 
         public IEnumerable<T> GetAll(string? includeProperties = null)

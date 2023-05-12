@@ -39,6 +39,7 @@ namespace BulkyWeb.Areas.Customer.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [Authorize]
         public IActionResult Details(ShoppingCart shoppingCart)
         {
@@ -46,7 +47,25 @@ namespace BulkyWeb.Areas.Customer.Controllers
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
             shoppingCart.ApplicationUserId = userId;
 
-            _unitOfWork.ShoppingCart.Add(shoppingCart);
+            ShoppingCart cartFromDb = _unitOfWork.ShoppingCart.Get(u => u.ApplicationUserId == userId &&
+            u.ProductId == shoppingCart.ProductId);
+
+            if(cartFromDb != null) 
+            {
+                //shopping cart Exist
+                cartFromDb.Count += shoppingCart.Count;
+                _unitOfWork.ShoppingCart.Update(cartFromDb);
+
+            }
+            else
+            {
+                // add cart record
+                _unitOfWork.ShoppingCart.Add(shoppingCart);
+
+
+            }           
+            shoppingCart.Id = 0;
+            TempData["success"] = "Cart Updated Successfully!";
             _unitOfWork.Save();
 
             return RedirectToAction(nameof(Index));
