@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Bulky.Models.ViewModels
 {
-    public class ShoppingVM
+    public class ShoppingCartVM
     {
         public IEnumerable<ShoppingCart> ShoppingCartList { get; set; }
         
