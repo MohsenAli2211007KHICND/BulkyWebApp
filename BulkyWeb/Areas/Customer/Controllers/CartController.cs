@@ -1,5 +1,6 @@
 ﻿using Bulky.DataAccess.Migrations;
 using Bulky.DataAccess.Repository.IRepository;
+using Bulky.Models;
 using Bulky.Models.Models;
 using Bulky.Models.ViewModels;
 using Bulky.Utilities;
@@ -107,7 +108,7 @@ namespace BulkyWeb.Areas.Customer.Controllers
             ShoppingCartVM.OrderHeader.OrderDate = DateTime.Now;
             ShoppingCartVM.OrderHeader.ApplicationUserId = userId;
 
-			ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser.Get(u => u.Id == userId);
+			ApplicationUser applicationUser = _unitOfWork.ApplicationUser.Get(u => u.Id == userId);
 
 		
 
@@ -116,7 +117,7 @@ namespace BulkyWeb.Areas.Customer.Controllers
 				cart.Price = GetPriceBasedOnQuantity(cart);
 				ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
 			}
-            if (ShoppingCartVM.OrderHeader.ApplicationUser.CompanyId.GetValueOrDefault() == 0)
+            if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
                 // Regular User
                 ShoppingCartVM.OrderHeader.OrderStatus = SD.StatusPending;
@@ -144,10 +145,20 @@ namespace BulkyWeb.Areas.Customer.Controllers
                 _unitOfWork.OrderDetail.Add(orderDetail);
                 _unitOfWork.Save();
             }
+			if (applicationUser.CompanyId.GetValueOrDefault() == 0)
+            {
 
-			return View(ShoppingCartVM);
+            }
+            return RedirectToAction(nameof(OrderConfirmation), new { id=ShoppingCartVM.OrderHeader.Id});
+
+
+				//return View(ShoppingCartVM);
 		}
 
+        public IActionResult OrderConfirmation (int  id)
+        {
+            return View(id);
+        }
 
 		private double GetPriceBasedOnQuantity(ShoppingCart shoppingCart)
         {

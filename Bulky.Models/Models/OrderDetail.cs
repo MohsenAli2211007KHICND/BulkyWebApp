@@ -11,10 +11,11 @@ namespace Bulky.Models.Models
 {
     public class OrderDetail
     {
+ 
         public int Id { get; set; }
         [Required]
         public int OrderHeaderId { get; set; }
-        [ForeignKey("OredrHeaderId")]
+        [ForeignKey("OrderHeaderId")]
         [ValidateNever]
         public OrderHeader OrderHeader { get; set; }
 
