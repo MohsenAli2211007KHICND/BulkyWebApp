@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,6 +26,6 @@ namespace Bulky.Utilities
 		public const string PymentStatusDelayedPayment = "ApprovedForDelayedPayment";
 		public const string PymentStatusRejected = "Rejected";
 
-
+		public const string SessionCart = "SessionShoppingCart";
 	}
 }
