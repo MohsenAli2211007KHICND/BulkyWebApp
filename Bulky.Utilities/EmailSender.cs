@@ -17,6 +17,7 @@ namespace Bulky.Utilities
         {
             SendGridSecret = _config.GetValue<string>("SendGrid:SecretKey");
         }
+
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             var client = new SendGridClient(SendGridSecret);
