@@ -13,8 +13,6 @@ namespace Bulky.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        //[Key]
-        //public int Id { get; set; }
         [Required]
         public string Name { get; set; }
 
