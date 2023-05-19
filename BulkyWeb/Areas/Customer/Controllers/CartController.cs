@@ -227,6 +227,7 @@ namespace BulkyWeb.Areas.Customer.Controllers
             return View(id);
         }
 
+
 		private double GetPriceBasedOnQuantity(ShoppingCart shoppingCart)
         {
             if (shoppingCart.Count <= 50)
