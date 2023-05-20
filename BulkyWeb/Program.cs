@@ -62,7 +62,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
-SeedDatabase();
+//SeedDatabase();
 app.MapRazorPages();
 app.MapControllerRoute(
     name: "default",
@@ -70,11 +70,11 @@ app.MapControllerRoute(
 
 app.Run();
 
-void SeedDatabase ()
-{
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbInitalizer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-        dbInitalizer.Initialize();
-    }
-}
+//void SeedDatabase ()
+//{
+//    using (var scope = app.Services.CreateScope())
+//    {
+//        var dbInitalizer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+//        dbInitalizer.Initialize();
+//    }
+//}
