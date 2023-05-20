@@ -32,7 +32,7 @@ namespace Bulky.DataAccess.DbInitializer
             //migration if they are not applied
             try
             {
-                if (_db.Database.GetPendingMigrations().Count() >= 0)
+                if (_db.Database.GetPendingMigrations().Count() > 0)
                 {
                     _db.Database.Migrate();
                 }
