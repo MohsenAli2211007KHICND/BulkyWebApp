@@ -1,5 +1,4 @@
-﻿using Bulky.DataAccess.Migrations;
-using Bulky.DataAccess.Repository.IRepository;
+﻿using Bulky.DataAccess.Repository.IRepository;
 using Bulky.Models;
 using Bulky.Models.Models;
 using Bulky.Models.ViewModels;
@@ -156,7 +155,8 @@ namespace BulkyWeb.Areas.Customer.Controllers
             }
 			if (applicationUser.CompanyId.GetValueOrDefault() == 0)
             {
-                var domain = Request.Scheme + "://" + Request.Host.Value + "/";
+                //var domain = Request.Scheme + "://" + Request.Host.Value + "/";
+                var domain = "http://localhost:5107/";
                 var options = new SessionCreateOptions
                 {
                     SuccessUrl = domain+ $"customer/cart/OrderConfirmation?id={ShoppingCartVM.OrderHeader.Id}",

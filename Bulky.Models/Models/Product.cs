@@ -46,5 +46,8 @@ namespace Bulky.Models.Models
         public Category Category { get; set; }
         [ValidateNever]
         public string ImgUrl { get; set; }
+
+        //  Migration loti 
+        public int TestProperty { get; set; }
     }
 }
