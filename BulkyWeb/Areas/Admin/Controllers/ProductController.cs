@@ -45,35 +45,16 @@ namespace BulkyWeb.Areas.Admin.Controllers
             }
             else
             {
-                productVM.Product = _unitOfWork.Product.Get(u => u.Id == id);
+                productVM.Product = _unitOfWork.Product.Get(u => u.Id == id, includeProperties : "ProductImages");
                 return View(productVM);
             }
         }
         [HttpPost]
-        public IActionResult Upsert(ProductVM productVM, IFormFile? file)
+        public IActionResult Upsert(ProductVM productVM, List<IFormFile>? files)
         {
             if (ModelState.IsValid)
             {
-                string wwwRootPath = _webHostEnvironment.WebRootPath;
-                if(file != null)
-                {
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    string productPath = Path.Combine(wwwRootPath, @"Images\Products");
-                    if(!string.IsNullOrEmpty(productVM.Product.ImgUrl))
-                    {
-                        var oldImagePath = Path.Combine(wwwRootPath, productVM.Product.ImgUrl.Trim('\\'));
-                        if(System.IO.File.Exists(oldImagePath))
-                        {
-                            System.IO.File.Delete(oldImagePath);
-                        }
-                    }
-                    using( var fileStream = new FileStream(Path.Combine(productPath, fileName),FileMode.Create))
-                    {
-                        file.CopyTo(fileStream);
-                    }
-                    productVM.Product.ImgUrl = @"\Images\Products\" + fileName;
-                }
-                if (productVM.Product.Id == 0) 
+                if (productVM.Product.Id == 0)
                 {
                     _unitOfWork.Product.Add(productVM.Product);
                 }
@@ -82,7 +63,40 @@ namespace BulkyWeb.Areas.Admin.Controllers
                     _unitOfWork.Product.Update(productVM.Product);
                 }
                 _unitOfWork.Save();
-                TempData["Success"] = "Product Created Successfully!";
+
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                if(files != null)
+                {
+                    foreach (var file in files)
+                    {
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                        string productPath = @"Images\Products\Product-"+ productVM.Product.Id;
+                        string finalPath = Path.Combine(wwwRootPath, productPath);
+
+                        if (!Directory.Exists(finalPath))
+                            Directory.CreateDirectory(finalPath);
+                        using (var fileStream = new FileStream(Path.Combine(finalPath, fileName), FileMode.Create))
+                        {
+                            file.CopyTo(fileStream);
+                        }
+
+                        ProductImage productImage = new()
+                        {
+                            ImageUrl = @"\" + productPath + @"\" + fileName,
+                            ProductId = productVM.Product.Id,
+                        };
+
+                        if (productVM.Product.ProductImages == null)
+                            productVM.Product.ProductImages = new List<ProductImage>();
+                        
+                        productVM.Product.ProductImages.Add(productImage);
+                    }
+
+                    _unitOfWork.Product.Update(productVM.Product);
+                    _unitOfWork.Save();
+
+                }
+                TempData["Success"] = "Product Created/Updated Successfully!";
                 return RedirectToAction("Index", "Product");
             }
             else
@@ -96,6 +110,39 @@ namespace BulkyWeb.Areas.Admin.Controllers
 
             }
         }
+
+
+        public IActionResult DeleteImage(int imageId)
+        {
+            var imageToBeDeleted = _unitOfWork.ProductImage.Get(u => u.Id == imageId);
+            var productId = imageToBeDeleted.ProductId;
+            if (imageToBeDeleted != null)
+            {
+                if (!string.IsNullOrEmpty(imageToBeDeleted.ImageUrl))
+                {
+                    var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, 
+                        imageToBeDeleted.ImageUrl.Trim('\\'));
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
+                }
+
+                _unitOfWork.ProductImage.Remove(imageToBeDeleted);
+                _unitOfWork.Save();
+
+                TempData["success"] = "Deleted Successfully!";
+             }
+            return RedirectToAction(nameof(Upsert), new { id = productId });
+        }
+
+
+
+
+
+
+
+
         [HttpDelete]
         public IActionResult Delete(int? id)
         {
@@ -104,18 +151,28 @@ namespace BulkyWeb.Areas.Admin.Controllers
             {
                 return Json( new {success = false, message = "Error while Deleting!"});
             }
-            var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, product.ImgUrl.Trim('\\'));
-            if (System.IO.File.Exists(oldImagePath))
-            {
-                System.IO.File.Delete(oldImagePath);
-            }
-        
 
+
+            string productPath = @"Images\Products\Product-" + id;
+            string finalPath = Path.Combine(_webHostEnvironment.WebRootPath, productPath);
+
+            if (Directory.Exists(finalPath))
+            {
+                string[] filePaths = Directory.GetFiles(finalPath);
+                foreach (string filePath in filePaths)
+                {
+                    System.IO.File.Delete(filePath);
+                }
+
+                Directory.Delete(finalPath);
+            }
             _unitOfWork.Product.Remove(product);
             _unitOfWork.Save();
             TempData["success"] = "Product Deleted successfully!";
             return Json(new { success = true, message = "Product deleted" });
         }
+
+
 
         [HttpGet]
         public IActionResult GetAll() 
