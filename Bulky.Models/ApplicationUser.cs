@@ -18,11 +18,14 @@ namespace Bulky.Models
 
         public string? City { get; set; }
         public string? Region { get; set; }
-        public string? PostalCode { get; set;}
+        public string? PostalCode { get; set; }
         public string? Country { get; set; }
         public int? CompanyId { get; set; }
         [ForeignKey("CompanyId")]
         [ValidateNever]
         public Company? Company { get; set; }
+
+        [NotMapped]
+        public string Role { get; set; }
     }
 }

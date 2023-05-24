@@ -29,7 +29,24 @@ namespace BulkyWeb.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            IEnumerable<ApplicationUser> userList = _db.ApplicationUsers.Include(u => u.Company).ToList();
+            List<ApplicationUser> userList = _db.ApplicationUsers.Include(u => u.Company).ToList();
+
+            var userRoles = _db.UserRoles.ToList();
+            var roles = _db.Roles.ToList();
+
+            foreach (var user in userList)
+            {
+                var roleId = userRoles.FirstOrDefault(u => u.UserId == user.Id).RoleId;
+                user.Role = _db.Roles.FirstOrDefault(u => u.Id == roleId).Name;
+
+                if (user.Company == null)
+                {
+                    user.Company = new()
+                    {
+                        Name = ""
+                    };
+                }
+            }
             return Json(new { data = userList });
         }
 
